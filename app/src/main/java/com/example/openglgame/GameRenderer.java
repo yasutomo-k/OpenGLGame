@@ -19,13 +19,15 @@ public class GameRenderer implements GLSurfaceView.Renderer{
 
     public GameRenderer(Context context){
         Resources resources = context.getResources();
-        InputStream vertex_stream = resources.openRawResource(R.raw.texture_vertex);
-        InputStream fragment_stream = resources.openRawResource(R.raw.texture_fragment);
+        InputStream vertex_stream = resources.openRawResource(R.raw.point_vertex);
+        InputStream fragment_stream = resources.openRawResource(R.raw.point_fragment);
         mProgram = new Program(vertex_stream, fragment_stream);
     }
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-        GLES20.glClearColor(0.0f, 0.5f, 0.5f, 0.0f);
+        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        mProgram.build();
+        mProgram.enable();
     }
 
     @Override
@@ -36,5 +38,6 @@ public class GameRenderer implements GLSurfaceView.Renderer{
     @Override
     public void onDrawFrame(GL10 gl) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+        GLES20.glDrawArrays(GLES20.GL_POINTS, 0, 1);
     }
 }
