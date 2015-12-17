@@ -1,13 +1,28 @@
 package com.example.openglgame;
 
+import android.content.Context;
+import android.content.res.Resources;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+
+import com.example.openglgame.glwrapper.Program;
+
+import java.io.InputStream;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 
-public class GLRenderer implements GLSurfaceView.Renderer{
+public class GameRenderer implements GLSurfaceView.Renderer{
+
+    private Program mProgram;
+
+    public GameRenderer(Context context){
+        Resources resources = context.getResources();
+        InputStream vertex_stream = resources.openRawResource(R.raw.texture_vertex);
+        InputStream fragment_stream = resources.openRawResource(R.raw.texture_fragment);
+        mProgram = new Program(vertex_stream, fragment_stream);
+    }
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
         GLES20.glClearColor(0.0f, 0.5f, 0.5f, 0.0f);

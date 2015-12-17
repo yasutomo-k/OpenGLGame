@@ -17,7 +17,7 @@ public class MainActivity extends AppCompatActivity {
         mGLSurfaceView = new GLSurfaceView(this);
         mGLSurfaceView.setEGLContextClientVersion(2);
         mGLSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 8, 0);
-        mGLSurfaceView.setRenderer(new GLRenderer());
+        mGLSurfaceView.setRenderer(new GameRenderer(this));
 
         setContentView(mGLSurfaceView);
     }
