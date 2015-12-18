@@ -23,7 +23,7 @@ public class GameRenderer implements GLSurfaceView.Renderer{
     private Program mProgram;
     private FloatBuffer mFloatBuffer;
 
-    private float[] mPoint = {0.0f,0.0f};
+    private float[] mPoint = {0.0f,0.0f,0.5f,0.5f,0.0f,-0.5f};
 
     public GameRenderer(Context context){
         Resources resources = context.getResources();
@@ -32,7 +32,7 @@ public class GameRenderer implements GLSurfaceView.Renderer{
         InputStream fragment_stream = resources.openRawResource(R.raw.point_fragment);
 
         mProgram = new Program(vertex_stream, fragment_stream);
-        mFloatBuffer = ByteBuffer.allocateDirect(2 * FLOAT_SIZE).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        mFloatBuffer = ByteBuffer.allocateDirect(6 * FLOAT_SIZE).order(ByteOrder.nativeOrder()).asFloatBuffer();
 
     }
     @Override
@@ -57,6 +57,7 @@ public class GameRenderer implements GLSurfaceView.Renderer{
         int a_Position = mProgram.getAttributeLocation("a_Position");
         GLES20.glVertexAttribPointer(a_Position, 2 , GLES20.GL_FLOAT, false, 0 , mFloatBuffer);
         GLES20.glEnableVertexAttribArray(a_Position);
-        GLES20.glDrawArrays(GLES20.GL_POINTS, 0 , 1);
+
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0 , 3);
     }
 }
