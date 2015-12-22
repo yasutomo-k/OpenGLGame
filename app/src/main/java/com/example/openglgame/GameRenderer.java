@@ -7,6 +7,7 @@ import android.opengl.GLSurfaceView;
 
 import com.example.openglgame.glwrapper.Program;
 import com.example.openglgame.graphics.Rectangle;
+import com.example.openglgame.utils.GameTime;
 
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -25,11 +26,14 @@ public class GameRenderer implements GLSurfaceView.Renderer{
     private ShortBuffer mShortBuffer;
 
     private Rectangle mRectangle;
+    private GameTime mTime;
 
     private int[] mVertex;
     private int mPositionHandler;
 
     public GameRenderer(Context context){
+        mTime = new GameTime();
+
         int maxSize = 100;
         Resources resources = context.getResources();
 
@@ -66,6 +70,7 @@ public class GameRenderer implements GLSurfaceView.Renderer{
 
     @Override
     public void onDrawFrame(GL10 gl) {
+        mTime.update();
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
         mRectangle.getCoords(mFloatBuffer, mShortBuffer);
@@ -79,6 +84,8 @@ public class GameRenderer implements GLSurfaceView.Renderer{
         GLES20.glVertexAttribPointer(mPositionHandler, 2 , GLES20.GL_FLOAT, false, 0 , 0);
         GLES20.glEnableVertexAttribArray(mPositionHandler);
 
-        GLES20.glDrawElements(GLES20.GL_TRIANGLES,mRectangle.getIndexCount(),GLES20.GL_UNSIGNED_SHORT,0);
+        GLES20.glDrawElements(GLES20.GL_TRIANGLES, mRectangle.getIndexCount(), GLES20.GL_UNSIGNED_SHORT, 0);
+
+        mTime.logFPS();
     }
 }
