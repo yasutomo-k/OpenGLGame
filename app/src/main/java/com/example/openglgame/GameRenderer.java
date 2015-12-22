@@ -23,7 +23,9 @@ public class GameRenderer implements GLSurfaceView.Renderer{
     private Program mProgram;
     private FloatBuffer mFloatBuffer;
 
-    private float[] mPoint = {0.0f,0.0f,0.5f,0.5f,0.0f,-0.5f};
+    private int[] mVertex;
+
+    private float[] mPoint = {-0.5f,0.5f,-0.5f,-0.5f,0.5f,0.5f,0.5f,-0.5f};
 
     public GameRenderer(Context context){
         Resources resources = context.getResources();
@@ -32,7 +34,9 @@ public class GameRenderer implements GLSurfaceView.Renderer{
         InputStream fragment_stream = resources.openRawResource(R.raw.point_fragment);
 
         mProgram = new Program(vertex_stream, fragment_stream);
-        mFloatBuffer = ByteBuffer.allocateDirect(6 * FLOAT_SIZE).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        mFloatBuffer = ByteBuffer.allocateDirect(8 * FLOAT_SIZE).order(ByteOrder.nativeOrder()).asFloatBuffer();
+
+
 
     }
     @Override
@@ -41,6 +45,13 @@ public class GameRenderer implements GLSurfaceView.Renderer{
         mProgram.build();
         mProgram.enable();
 
+        mFloatBuffer.put(mPoint);
+        mFloatBuffer.flip();
+
+        mVertex = new int[1];
+        GLES20.glGenBuffers(1, mVertex, 0);
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVertex[0]);
+        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, FLOAT_SIZE * 8, mFloatBuffer, GLES20.GL_STATIC_DRAW);
     }
 
     @Override
@@ -51,13 +62,11 @@ public class GameRenderer implements GLSurfaceView.Renderer{
     @Override
     public void onDrawFrame(GL10 gl) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-        mFloatBuffer.put(mPoint);
-        mFloatBuffer.flip();
 
         int a_Position = mProgram.getAttributeLocation("a_Position");
-        GLES20.glVertexAttribPointer(a_Position, 2 , GLES20.GL_FLOAT, false, 0 , mFloatBuffer);
+        GLES20.glVertexAttribPointer(a_Position, 2 , GLES20.GL_FLOAT, false, 0 , 0);
         GLES20.glEnableVertexAttribArray(a_Position);
 
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0 , 3);
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0 , 4);
     }
 }
