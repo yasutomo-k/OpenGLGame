@@ -6,6 +6,7 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 
 import com.example.openglgame.glwrapper.Program;
+import com.example.openglgame.graphics.Rectangle;
 
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -23,9 +24,9 @@ public class GameRenderer implements GLSurfaceView.Renderer{
     private Program mProgram;
     private FloatBuffer mFloatBuffer;
 
-    private int[] mVertex;
+    private Rectangle mRectangle;
 
-    private float[] mPoint = {-0.5f,0.5f,-0.5f,-0.5f,0.5f,0.5f,0.5f,-0.5f};
+    private int[] mVertex;
 
     public GameRenderer(Context context){
         Resources resources = context.getResources();
@@ -34,10 +35,9 @@ public class GameRenderer implements GLSurfaceView.Renderer{
         InputStream fragment_stream = resources.openRawResource(R.raw.point_fragment);
 
         mProgram = new Program(vertex_stream, fragment_stream);
-        mFloatBuffer = ByteBuffer.allocateDirect(8 * FLOAT_SIZE).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        mRectangle = new Rectangle(0f, 0f, 0.5f, 0.5f);
 
-
-
+        mFloatBuffer = ByteBuffer.allocateDirect(mRectangle.getSize()).order(ByteOrder.nativeOrder()).asFloatBuffer();
     }
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
@@ -45,13 +45,13 @@ public class GameRenderer implements GLSurfaceView.Renderer{
         mProgram.build();
         mProgram.enable();
 
-        mFloatBuffer.put(mPoint);
+        mFloatBuffer.put(mRectangle.getCoords());
         mFloatBuffer.flip();
 
         mVertex = new int[1];
         GLES20.glGenBuffers(1, mVertex, 0);
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVertex[0]);
-        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, FLOAT_SIZE * 8, mFloatBuffer, GLES20.GL_STATIC_DRAW);
+        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, mRectangle.getSize(), mFloatBuffer, GLES20.GL_STATIC_DRAW);
     }
 
     @Override
@@ -67,6 +67,6 @@ public class GameRenderer implements GLSurfaceView.Renderer{
         GLES20.glVertexAttribPointer(a_Position, 2 , GLES20.GL_FLOAT, false, 0 , 0);
         GLES20.glEnableVertexAttribArray(a_Position);
 
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0 , 4);
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0 , mRectangle.getCount());
     }
 }
