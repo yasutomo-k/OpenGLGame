@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 
+import com.example.openglgame.glwrapper.Index;
 import com.example.openglgame.glwrapper.Program;
 import com.example.openglgame.graphics.ColoredRectangle;
 import com.example.openglgame.graphics.GLColor;
@@ -27,11 +28,10 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class GameRenderer implements GLSurfaceView.Renderer{
 
-    private final int SHORT_SIZE = Short.SIZE/Byte.SIZE;
-
     private Program mProgram;
+    private Index mIndex;
+
     private FloatBuffer mFloatBuffer;
-    private ShortBuffer mShortBuffer;
 
     private GameTime mTime;
 
@@ -45,7 +45,7 @@ public class GameRenderer implements GLSurfaceView.Renderer{
     private int mPositionHandler,mColorHandler;
 
     public GameRenderer(Context context){
-        mMax = 1000;
+        mMax = 10000;
         mTime = new GameTime();
         mRand = new Random();
 
@@ -61,10 +61,10 @@ public class GameRenderer implements GLSurfaceView.Renderer{
         InputStream fragment_stream = resources.openRawResource(R.raw.color_fragment);
 
         mProgram = new Program(vertex_stream, fragment_stream);
+        mIndex = new Index(mMax);
 
 
         mFloatBuffer = ByteBuffer.allocateDirect(ColoredRectangle.getSize()*mMax).order(ByteOrder.nativeOrder()).asFloatBuffer();
-        mShortBuffer = ByteBuffer.allocateDirect(6 * SHORT_SIZE*mMax).order(ByteOrder.nativeOrder()).asShortBuffer();
     }
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
@@ -75,13 +75,11 @@ public class GameRenderer implements GLSurfaceView.Renderer{
         mPositionHandler = mProgram.getAttributeLocation("a_Position");
         mColorHandler = mProgram.getAttributeLocation("a_Color");
 
-        mVertex = new int[2];
-        GLES20.glGenBuffers(2, mVertex, 0);
+        mVertex = new int[1];
+        GLES20.glGenBuffers(1, mVertex, 0);
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVertex[0]);
-        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, mVertex[1]);
 
-        setIndex();
-
+        mIndex.bind();
     }
 
     @Override
@@ -100,7 +98,6 @@ public class GameRenderer implements GLSurfaceView.Renderer{
         mFloatBuffer.flip();
 
 
-        GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, 6 * SHORT_SIZE*mMax, mShortBuffer, GLES20.GL_STATIC_DRAW);
         GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER,ColoredRectangle.getSize()*mMax, mFloatBuffer, GLES20.GL_STATIC_DRAW);
         GLES20.glVertexAttribPointer(mPositionHandler, 2, GLES20.GL_FLOAT, false, ColoredRectangle.getStride(), 0);
         GLES20.glVertexAttribPointer(mColorHandler,3,GLES20.GL_FLOAT,false,ColoredRectangle.getStride(),ColoredRectangle.getColorOffset());
@@ -112,21 +109,4 @@ public class GameRenderer implements GLSurfaceView.Renderer{
         mTime.logFPS();
     }
 
-    private void setIndex(){
-        short[] index = new short[6 * mMax];
-        int len = index.length;
-        int i,j;
-
-        for(i = 0, j = 0 ; i < len; i += 6, j += 4){
-            index[i] = (short)j;
-            index[i + 1] = (short)(j + 1);
-            index[i + 2] = (short)(j + 2);
-            index[i + 3] = (short)j;
-            index[i + 4] = (short)(j + 2);
-            index[i + 5] = (short)(j + 3);
-        }
-
-        mShortBuffer.put(index);
-        mShortBuffer.flip();
-    }
 }
