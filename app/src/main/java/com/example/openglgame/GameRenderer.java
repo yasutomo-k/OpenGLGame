@@ -2,15 +2,19 @@ package com.example.openglgame;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 
 import com.example.openglgame.glwrapper.Index;
 import com.example.openglgame.glwrapper.Program;
+import com.example.openglgame.glwrapper.Texture;
 import com.example.openglgame.graphics.ColoredRectangle;
 import com.example.openglgame.graphics.GLColor;
 import com.example.openglgame.graphics.Rectangle;
+import com.example.openglgame.graphics.ST;
+import com.example.openglgame.graphics.TextureRectangle;
 import com.example.openglgame.utils.GameTime;
 
 import java.io.InputStream;
@@ -28,16 +32,17 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class GameRenderer implements GLSurfaceView.Renderer{
 
+    int FLOAT_SIZE = Float.SIZE/Byte.SIZE;
     private Program mProgram;
     private Index mIndex;
+    private Texture mTexture;
 
     private FloatBuffer mFloatBuffer;
 
     private GameTime mTime;
-
     private Random mRand;
 
-    private List<ColoredRectangle> mObjects;
+    private List<TextureRectangle> mObjects;
 
     private int mMax;
 
@@ -45,26 +50,28 @@ public class GameRenderer implements GLSurfaceView.Renderer{
     private int mPositionHandler,mColorHandler;
 
     public GameRenderer(Context context){
-        mMax = 10000;
+        mMax = 100000;
         mTime = new GameTime();
         mRand = new Random();
+
+        mTexture = new Texture(0, BitmapFactory.decodeResource(context.getResources(),R.mipmap.ic_launcher));
 
         mObjects = new ArrayList<>();
 
         for(int i = 0;i<mMax;i++){
-            mObjects.add(new ColoredRectangle((2*mRand.nextFloat()-1),2*mRand.nextFloat()-1,0.1f,0.1f,new GLColor(mRand.nextFloat(),mRand.nextFloat(),mRand.nextFloat())));
+            mObjects.add(new TextureRectangle((2*mRand.nextFloat()-1),2*mRand.nextFloat()-1,0.1f,0.1f,new ST(0f,0f,1.0f,1.0f)));
         }
 
         Resources resources = context.getResources();
 
-        InputStream vertex_stream = resources.openRawResource(R.raw.color_vertex);
-        InputStream fragment_stream = resources.openRawResource(R.raw.color_fragment);
+        InputStream vertex_stream = resources.openRawResource(R.raw.texture_vertex);
+        InputStream fragment_stream = resources.openRawResource(R.raw.texture_fragment);
 
         mProgram = new Program(vertex_stream, fragment_stream);
         mIndex = new Index(mMax);
 
 
-        mFloatBuffer = ByteBuffer.allocateDirect(ColoredRectangle.getSize()*mMax).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        mFloatBuffer = ByteBuffer.allocateDirect(TextureRectangle.getSize()*mMax).order(ByteOrder.nativeOrder()).asFloatBuffer();
     }
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
@@ -73,13 +80,15 @@ public class GameRenderer implements GLSurfaceView.Renderer{
         mProgram.enable();
 
         mPositionHandler = mProgram.getAttributeLocation("a_Position");
-        mColorHandler = mProgram.getAttributeLocation("a_Color");
+        mColorHandler = mProgram.getAttributeLocation("a_TexCoord");
 
         mVertex = new int[1];
         GLES20.glGenBuffers(1, mVertex, 0);
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVertex[0]);
 
         mIndex.bind();
+        mTexture.load();
+        mTexture.enable(mProgram.getUniformLocation("u_Sampler"));
     }
 
     @Override
@@ -92,19 +101,19 @@ public class GameRenderer implements GLSurfaceView.Renderer{
         mTime.update();
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
-        for(ColoredRectangle each:mObjects){
+        for(TextureRectangle each:mObjects){
             each.getCoords(mFloatBuffer);
         }
         mFloatBuffer.flip();
 
 
-        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER,ColoredRectangle.getSize()*mMax, mFloatBuffer, GLES20.GL_STATIC_DRAW);
-        GLES20.glVertexAttribPointer(mPositionHandler, 2, GLES20.GL_FLOAT, false, ColoredRectangle.getStride(), 0);
-        GLES20.glVertexAttribPointer(mColorHandler,3,GLES20.GL_FLOAT,false,ColoredRectangle.getStride(),ColoredRectangle.getColorOffset());
+        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER,TextureRectangle.getSize()*mMax, mFloatBuffer, GLES20.GL_STATIC_DRAW);
+        GLES20.glVertexAttribPointer(mPositionHandler, 2, GLES20.GL_FLOAT, false, 4*FLOAT_SIZE, 0);
+        GLES20.glVertexAttribPointer(mColorHandler,2,GLES20.GL_FLOAT,false,4*FLOAT_SIZE,2*FLOAT_SIZE);
         GLES20.glEnableVertexAttribArray(mPositionHandler);
         GLES20.glEnableVertexAttribArray(mColorHandler);
 
-        GLES20.glDrawElements(GLES20.GL_TRIANGLES, 6 * mMax, GLES20.GL_UNSIGNED_SHORT, 0);
+        GLES20.glDrawElements(GLES20.GL_TRIANGLES, 6*mMax, GLES20.GL_UNSIGNED_SHORT, 0);
 
         mTime.logFPS();
     }
