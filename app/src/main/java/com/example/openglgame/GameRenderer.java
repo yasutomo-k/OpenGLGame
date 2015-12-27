@@ -50,11 +50,11 @@ public class GameRenderer implements GLSurfaceView.Renderer{
     private int mPositionHandler,mColorHandler;
 
     public GameRenderer(Context context){
-        mMax = 100000;
+        mMax = 1000;
         mTime = new GameTime();
         mRand = new Random();
 
-        mTexture = new Texture(0, BitmapFactory.decodeResource(context.getResources(),R.mipmap.ic_launcher));
+        mTexture = new Texture(0, BitmapFactory.decodeResource(context.getResources(),R.drawable.sphere));
 
         mObjects = new ArrayList<>();
 
