@@ -1,25 +1,18 @@
 package com.example.openglgame;
 
-import android.opengl.GLSurfaceView;
-import android.support.v7.app.AppCompatActivity;
+import android.app.Activity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
 
-    GLSurfaceView mGLSurfaceView;
+    GameSurface mSurfaceView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mGLSurfaceView = new GLSurfaceView(this);
-        mGLSurfaceView.setEGLContextClientVersion(2);
-        mGLSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 8, 0);
-        mGLSurfaceView.setRenderer(new GameRenderer(this));
-
-        setContentView(mGLSurfaceView);
+        mSurfaceView = new GameSurface(this, new GameRenderer(this));
+        setContentView(mSurfaceView);
     }
 
 }
