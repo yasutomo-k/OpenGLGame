@@ -3,28 +3,23 @@ package com.example.openglgame;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
-import android.util.Log;
 import android.view.MotionEvent;
 
 import com.example.openglgame.glwrapper.Index;
 import com.example.openglgame.glwrapper.Program;
 import com.example.openglgame.glwrapper.Texture;
-import com.example.openglgame.graphics.ColoredRectangle;
-import com.example.openglgame.graphics.GLColor;
-import com.example.openglgame.graphics.Rectangle;
 import com.example.openglgame.graphics.ST;
 import com.example.openglgame.graphics.TextureRectangle;
+import com.example.openglgame.input.TouchHandler;
 import com.example.openglgame.utils.GameTime;
-import com.example.openglgame.utils.Touch;
+import com.example.openglgame.input.Touch;
 
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.nio.ShortBuffer;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -40,6 +35,8 @@ public class GameRenderer implements GLSurfaceView.Renderer{
     private Program mProgram;
     private Index mIndex;
     private Texture mTexture;
+
+    private TouchHandler mTouchHandler;
 
     private FloatBuffer mFloatBuffer;
 
@@ -62,6 +59,8 @@ public class GameRenderer implements GLSurfaceView.Renderer{
         mTime = new GameTime();
         mRand = new Random();
 
+        mTouchHandler = new TouchHandler();
+
         mTexture = new Texture(0, BitmapFactory.decodeResource(context.getResources(),R.drawable.sphere));
 
         mObjects = new ArrayList<>();
@@ -74,6 +73,8 @@ public class GameRenderer implements GLSurfaceView.Renderer{
 
         mProgram = new Program(vertex_stream, fragment_stream);
         mIndex = new Index(mMax);
+
+
 
 
         mFloatBuffer = ByteBuffer.allocateDirect(TextureRectangle.getSize()*mMax).order(ByteOrder.nativeOrder()).asFloatBuffer();
@@ -134,13 +135,7 @@ public class GameRenderer implements GLSurfaceView.Renderer{
     }
 
     public void onTouchEvent(MotionEvent event){
-        float x = event.getX();
-        float y = event.getY();
-
-        x = 2.0f*(x/mWidth)-1.0f;
-        y = (2*(mHeight-y)/mHeight) - 1.0f;
-
-        mTouchs.addFirst(new Touch(x, y));
+        mTouchHandler.onTouchEvent(event);
     }
 
 }
