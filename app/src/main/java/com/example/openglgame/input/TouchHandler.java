@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class TouchHandler {
 
@@ -26,10 +27,11 @@ public class TouchHandler {
     }
 
     public void onTouchEvent(MotionEvent event){
-        int id = event.getPointerId(event.getActionIndex());
+        int index = event.getActionIndex();
+        int id = event.getPointerId(index);
 
-        float x = event.getX();
-        float y = event.getY();
+        float x = event.getX(index);
+        float y = event.getY(index);
 
         x = 2.0f*(x/mWidth)-1.0f;
         y = (2*(mHeight-y)/mHeight) - 1.0f;
@@ -40,7 +42,10 @@ public class TouchHandler {
                 mTouchs.put(id,new Touch(x, y));
                 break;
             case MotionEvent.ACTION_MOVE:
-                mTouchs.get(id).move(x, y);
+                for(int size = event.getPointerCount(),i=0;i < size; i++){
+                    Touch touch = mTouchs.get(event.getPointerId(i));
+                    touch.move(event.getX(i),event.getY(i));
+                }
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_POINTER_UP:
@@ -49,8 +54,22 @@ public class TouchHandler {
         }
     }
 
+    public void update(float delataTime){
+        for(Integer id:mTouchs.keySet()){
+            mTouchs.get(id).update(delataTime);
+        }
+    }
+
     public boolean isEnpty(){
         return mTouchs.isEmpty();
+    }
+
+    public Set<Integer> keyset(){
+        return mTouchs.keySet();
+    }
+
+    public Touch get(Integer id){
+        return mTouchs.get(id);
     }
 
 }

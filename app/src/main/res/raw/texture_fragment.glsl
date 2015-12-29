@@ -1,5 +1,4 @@
-#version 120
-
+precision mediump float;
 uniform sampler2D u_Sampler;
 
 varying vec2 v_TexCoord;
