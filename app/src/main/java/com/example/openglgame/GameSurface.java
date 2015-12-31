@@ -3,19 +3,31 @@ package com.example.openglgame;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.support.annotation.NonNull;
+import android.util.AttributeSet;
 import android.view.MotionEvent;
 
 public class GameSurface extends GLSurfaceView {
 
     GameRenderer mRenderer;
 
-    public GameSurface(Context context, GameRenderer renderer){
+    public GameSurface(Context context){
         super(context);
-        mRenderer = renderer;
+        mRenderer = new GameRenderer(context);
 
         this.setEGLContextClientVersion(2);
         this.setEGLConfigChooser(8, 8, 8, 8, 8, 0);
-        this.setRenderer(renderer);
+        this.setRenderer(mRenderer);
+
+    }
+
+    public GameSurface(Context context,AttributeSet attrs){
+        super(context, attrs);
+
+        mRenderer = new GameRenderer(context);
+
+        this.setEGLContextClientVersion(2);
+        this.setEGLConfigChooser(8, 8, 8, 8, 8, 0);
+        this.setRenderer(mRenderer);
     }
 
     @Override
@@ -26,6 +38,6 @@ public class GameSurface extends GLSurfaceView {
                 mRenderer.onTouchEvent(event);
             }
         });
-        return super.onTouchEvent(event);
+        return true;
     }
 }
