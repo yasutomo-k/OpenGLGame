@@ -27,6 +27,7 @@ public class GameTime {
 
         if(System.nanoTime() - FPSTime >= TimeUnit.SECONDS.toNanos(1)){
             Log.d("", "FPS: " + frames);
+            DebugLog.fps = frames;
             frames = 0;
             FPSTime = System.nanoTime();
         }

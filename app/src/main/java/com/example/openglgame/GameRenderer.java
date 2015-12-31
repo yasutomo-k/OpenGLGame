@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.os.Debug;
 import android.view.MotionEvent;
 
 import com.example.openglgame.glwrapper.Index;
@@ -13,6 +14,7 @@ import com.example.openglgame.glwrapper.Texture;
 import com.example.openglgame.graphics.ST;
 import com.example.openglgame.graphics.TextureRectangle;
 import com.example.openglgame.input.TouchHandler;
+import com.example.openglgame.utils.DebugLog;
 import com.example.openglgame.utils.GameTime;
 import com.example.openglgame.input.Touch;
 
@@ -49,10 +51,11 @@ public class GameRenderer implements GLSurfaceView.Renderer{
     private int mMax,mSize;
     private int mPositionHandler,mColorHandler;
 
-    private float mWidth, mHeight;
+    private float mDeltaTime;
 
 
     public GameRenderer(Context context){
+        mDeltaTime = 0f;
         mMax = 100;
         mSize = 0;
 
@@ -76,9 +79,9 @@ public class GameRenderer implements GLSurfaceView.Renderer{
 
 
 
-
         mFloatBuffer = ByteBuffer.allocateDirect(TextureRectangle.getSize()*mMax).order(ByteOrder.nativeOrder()).asFloatBuffer();
     }
+
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -100,20 +103,19 @@ public class GameRenderer implements GLSurfaceView.Renderer{
     @Override
     public void onSurfaceChanged(GL10 gl, int width, int height) {
         GLES20.glViewport(0, 0, width, height);
-        mWidth = (float)width;
-        mHeight = (float)height;
+        mTouchHandler.setScreenSize(width, height);
     }
 
     @Override
     public void onDrawFrame(GL10 gl) {
-        mTime.update();
+        mDeltaTime = mTime.update();
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
-        if(!mTouchs.isEmpty()){
-            Touch touch = mTouchs.poll();
-            mObjects.add(new TextureRectangle(touch.getX(),touch.getY(),0.2f,0.2f,new ST(0f,0f,1f,1f)));
-            mSize += 1;
-        }
+        mObjects.clear();
+        mSize = 0;
+
+        mTouchHandler.update(mDeltaTime);
+
 
         for(TextureRectangle each:mObjects){
             each.getCoords(mFloatBuffer);
@@ -122,16 +124,16 @@ public class GameRenderer implements GLSurfaceView.Renderer{
         //clear
         mFloatBuffer.clear();
 
-
-        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER,TextureRectangle.getSize()*mSize, mFloatBuffer, GLES20.GL_STATIC_DRAW);
+        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, TextureRectangle.getSize() * mSize, mFloatBuffer, GLES20.GL_STATIC_DRAW);
         GLES20.glVertexAttribPointer(mPositionHandler, 2, GLES20.GL_FLOAT, false, TextureRectangle.getStride(), 0);
         GLES20.glVertexAttribPointer(mColorHandler,2,GLES20.GL_FLOAT,false,TextureRectangle.getStride(),TextureRectangle.getColorOffset());
         GLES20.glEnableVertexAttribArray(mPositionHandler);
         GLES20.glEnableVertexAttribArray(mColorHandler);
 
-        GLES20.glDrawElements(GLES20.GL_TRIANGLES, 6*mSize, GLES20.GL_UNSIGNED_SHORT, 0);
+        GLES20.glDrawElements(GLES20.GL_TRIANGLES, 6 * mSize, GLES20.GL_UNSIGNED_SHORT, 0);
 
         mTime.logFPS();
+        DebugLog.setText();
     }
 
     public void onTouchEvent(MotionEvent event){
