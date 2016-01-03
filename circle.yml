@@ -1,0 +1,13 @@
+machine:
+    java:
+        version: oraclejdk7
+    environment:
+        ANDROID_HOME: /usr/local/android-sdk-linux
+dependencies:
+    pre:
+        - chmod +x ./gradlew
+    override:
+        - echo y | android update sdk --no-ui --filter "android-21, build-tools-22.0.1"
+test:
+  override:
+    - ./gradlew test
