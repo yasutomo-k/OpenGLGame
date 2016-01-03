@@ -30,6 +30,6 @@ public class Touch {
     }
 
     public float getTime(){
-        return mTime;
+        return mTime*0.2f;
     }
 }

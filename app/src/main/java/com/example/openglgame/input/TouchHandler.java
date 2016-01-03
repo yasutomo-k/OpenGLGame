@@ -2,6 +2,8 @@ package com.example.openglgame.input;
 
 import android.view.MotionEvent;
 
+import com.example.openglgame.utils.DebugLog;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,13 +13,11 @@ import java.util.Set;
 public class TouchHandler {
 
     private Map<Integer, Touch> mTouchs;
-    private List<Touch> mTouchArray;
 
     private float mWidth, mHeight;
 
     public TouchHandler(){
         mTouchs = new HashMap<>();
-        mTouchArray = new ArrayList<>();
     }
 
     public void setScreenSize(int width, int height){
@@ -27,11 +27,10 @@ public class TouchHandler {
     }
 
     public void onTouchEvent(MotionEvent event){
-        int index = event.getActionIndex();
-        int id = event.getPointerId(index);
+        int id = event.getPointerId(event.getActionIndex());
 
-        float x = event.getX(index);
-        float y = event.getY(index);
+        float x = event.getX();
+        float y = event.getY();
 
         x = 2.0f*(x/mWidth)-1.0f;
         y = (2*(mHeight-y)/mHeight) - 1.0f;
@@ -40,23 +39,23 @@ public class TouchHandler {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_POINTER_DOWN:
                 mTouchs.put(id,new Touch(x, y));
+                DebugLog.touchs = "Down: id:" + id + " x: " + x + " y: " + y;
                 break;
             case MotionEvent.ACTION_MOVE:
-                for(int size = event.getPointerCount(),i=0;i < size; i++){
-                    Touch touch = mTouchs.get(event.getPointerId(i));
-                    touch.move(event.getX(i),event.getY(i));
-                }
+                mTouchs.get(id).move(x, y);
+                DebugLog.touchs = "Move: id:" + id + "x: " + x + " y: " + y;
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_POINTER_UP:
                 mTouchs.remove(id);
+                DebugLog.touchs = "Up: id:" + id + "x: " + x + " y: " + y;
                 break;
         }
     }
 
-    public void update(float delataTime){
+    public void update(float deltaTime){
         for(Integer id:mTouchs.keySet()){
-            mTouchs.get(id).update(delataTime);
+            mTouchs.get(id).update(deltaTime);
         }
     }
 
@@ -64,7 +63,7 @@ public class TouchHandler {
         return mTouchs.isEmpty();
     }
 
-    public Set<Integer> keyset(){
+    public Set<Integer> keySet(){
         return mTouchs.keySet();
     }
 

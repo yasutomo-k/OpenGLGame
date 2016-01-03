@@ -19,7 +19,7 @@ public class GameTime {
         tempTime = startTime;
         startTime = System.nanoTime();
 
-        return (startTime - tempTime)/ TimeUnit.SECONDS.toNanos(1);
+        return (startTime - tempTime)/ 1000000000.0f;
     }
 
     public void logFPS(){

@@ -116,6 +116,12 @@ public class GameRenderer implements GLSurfaceView.Renderer{
 
         mTouchHandler.update(mDeltaTime);
 
+        for(Integer id:mTouchHandler.keySet()){
+            Touch touch = mTouchHandler.get(id);
+            mObjects.add(new TextureRectangle(touch.getX(),touch.getY(),touch.getTime(),touch.getTime(),new ST(0f,0f,1f,1f)));
+            mSize += 1;
+        }
+
 
         for(TextureRectangle each:mObjects){
             each.getCoords(mFloatBuffer);
